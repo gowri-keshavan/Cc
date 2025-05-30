@@ -1,0 +1,279 @@
+You're working on a Monitoring and Logging skill badge lab in Google Cloud. Here's a full step-by-step guide for all 5 tasks to help you complete them successfully.
+
+
+---
+
+✅ Task 1: Install the Cloud Logging and Monitoring Agents
+
+📍Objective:
+
+Install Cloud Logging Agent and Cloud Monitoring Agent, and enable Apache monitoring plugin.
+
+
+---
+
+🛠️ Steps:
+
+1. Open Cloud Console → Go to VM instances.
+
+
+2. SSH into the VM named something like instance-1.
+
+
+3. Install Cloud Logging agent:
+
+
+
+curl -sSO https://dl.google.com/cloudagents/add-logging-agent-repo.sh
+sudo bash add-logging-agent-repo.sh
+sudo apt-get update
+sudo apt-get install -y google-fluentd
+sudo service google-fluentd start
+
+4. Install Cloud Monitoring agent:
+
+
+
+curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh
+sudo bash add-monitoring-agent-repo.sh
+sudo apt-get update
+sudo apt-get install -y stackdriver-agent
+sudo service stackdriver-agent start
+
+5. Enable Apache plugin:
+
+
+
+(cd /etc/stackdriver/collectd.d/ && sudo curl -O https://raw.githubusercontent.com/Stackdriver/stackdriver-agent-service-configs/master/etc/collectd.d/apache.conf)
+sudo service stackdriver-agent restart
+
+6. Go back and click Check my progress ✅
+
+
+
+
+---
+
+✅ Task 2: Add an Uptime Check for Apache Web Server on the VM
+
+📍Objective:
+
+Create an uptime check to verify your Apache server is running.
+
+
+---
+
+🛠️ Steps:
+
+1. Go to Monitoring → Uptime checks → Create Uptime Check.
+
+
+2. Set the following:
+
+Title: Apache Check
+
+Protocol: HTTP
+
+Resource Type: VM instance
+
+Applies to: Single (choose the correct instance)
+
+Path: /
+
+
+
+3. Click Test to verify it's working.
+
+
+4. Click Create.
+
+
+5. Go back and click Check my progress ✅
+
+
+
+
+---
+
+✅ Task 3: Add an Alert Policy for Apache Web Server
+
+📍Objective:
+
+Create an alert when traffic > 3 KiB/s, notify by email.
+
+
+---
+
+🛠️ Steps:
+
+1. Go to Monitoring > Alerting → Create Policy.
+
+
+2. Under Add Condition:
+
+Resource type: VM Instance
+
+Metric: apache/httpd/bytes_per_second
+
+Filter: (optional) use instance name
+
+Configuration: “is above” 3 KiB
+
+
+
+3. Under Notification Channels:
+
+Add your email if not already listed.
+
+
+
+4. Name the policy: Apache Traffic Alert
+
+
+5. Click Create Policy
+
+
+
+📤 Generate traffic:
+
+SSH into the VM again and run:
+
+timeout 120 bash -c -- 'while true; do curl localhost | grep -oP "<title>.*</title>"; sleep .1s;done'
+
+You may run it again to trigger the alert faster.
+
+
+6. Go back and click Check my progress ✅
+
+
+
+
+---
+
+✅ Task 4: Create a Dashboard and Charts
+
+📍Objective:
+
+Create a dashboard with two charts:
+
+1. CPU Load (1m)
+
+
+2. Apache HTTP Requests
+
+
+
+
+---
+
+🛠️ Steps:
+
+1. Go to Monitoring > Dashboards → Create Dashboard.
+
+
+2. Name it: Apache Dashboard
+
+
+
+📈 Chart 1 – CPU Load:
+
+Add chart → Line chart
+
+Resource type: VM Instance
+
+Metric: CPU Load (1m) (compute.googleapis.com/instance/cpu/utilization)
+
+Save chart
+
+
+📈 Chart 2 – Apache Requests:
+
+Add chart → Line chart
+
+Resource type: VM Instance
+
+Metric: apache/httpd/requests
+
+Save chart
+
+
+3. Save dashboard
+
+
+4. Go back and click Check my progress ✅
+
+
+
+
+---
+
+✅ Task 5: Create a Log-Based Metric
+
+📍Objective:
+
+Create a metric filtering for:
+
+Resource type: VM Instance
+
+Log name: apache-access
+
+Payload: textPayload:"200"
+
+
+
+---
+
+🛠️ Steps:
+
+1. Go to Logging > Logs Explorer
+
+
+2. Enter this filter:
+
+
+
+resource.type="gce_instance"
+logName="projects/PROJECT_ID/logs/apache-access"
+textPayload:"200"
+
+> Replace PROJECT_ID with your project (lab auto-fills it)
+
+
+
+3. Click "Create Metric" (above the logs preview).
+
+
+4. Name it: apache-200-metric
+
+
+5. Type: Counter
+
+
+6. Unit: 1
+
+
+7. Save the metric
+
+
+8. Go back and click Check my progress ✅
+
+
+
+
+---
+
+🎉 DONE!
+
+You’ve now successfully:
+
+Installed agents
+
+Set up monitoring and alerts
+
+Created a dashboard and charts
+
+Created log-based metrics
+
+
+Let me know if you want to automate any step with scripts or need screenshots for guidance.
+
